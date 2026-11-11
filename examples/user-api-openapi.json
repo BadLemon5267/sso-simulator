@@ -1,0 +1,81 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "示例：用户信息查询服务",
+    "description": "用于演示 SSO Simulator 的 OpenAPI 导入功能。导入 GET /api/v1/users/{username} 后，会自动生成地址参数与建议的响应映射。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://user-center.example.com" }
+  ],
+  "paths": {
+    "/api/v1/users/{username}": {
+      "get": {
+        "summary": "查询用户详细信息",
+        "operationId": "getUserDetail",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "schema": { "type": "string" }, "description": "登录账号" },
+          { "name": "includeRoles", "in": "query", "required": false, "schema": { "type": "boolean", "default": true } },
+          { "name": "X-App-Id", "in": "header", "required": true, "schema": { "type": "string" }, "description": "调用方应用标识" }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户信息",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "分页查询用户列表",
+        "parameters": [
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": { "type": "integer" },
+                    "list": { "type": "array", "items": { "$ref": "#/components/schemas/UserDetail" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserDetail": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 0 },
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": { "type": "string" },
+              "realName": { "type": "string", "description": "姓名" },
+              "deptName": { "type": "string", "description": "部门名称" },
+              "email": { "type": "string" },
+              "mobile": { "type": "string" },
+              "jobTitle": { "type": "string" },
+              "roles": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

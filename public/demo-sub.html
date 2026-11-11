@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>演示子系统</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+  body { background: #f7f8f5; }
+  .sub-shell { max-width: 760px; margin: 0 auto; padding: 46px 20px; }
+  .sub-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  .sub-brand .mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #0f766e, #134e4a); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 15px; }
+  .sub-brand .nm { font-size: 17px; font-weight: 700; }
+  .sub-brand .nm small { display: block; font-size: 11px; color: #6b7280; font-weight: 500; letter-spacing: 1px; }
+  .sub-state { border-radius: 12px; padding: 22px 24px; margin-bottom: 14px; }
+  .sub-state.loading { background: #fff; border: 1px solid var(--line); text-align: center; color: var(--ink-2); }
+  .sub-state.ok { background: #ecfdf3; border: 1px solid #a6f4c5; }
+  .sub-state.err { background: var(--danger-bg); border: 1px solid #fecdca; }
+  .sub-state .t { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .sub-state.ok .t { color: var(--ok); }
+  .sub-state.err .t { color: var(--danger); }
+  .kv { display: grid; grid-template-columns: 120px 1fr; font-size: 13px; row-gap: 6px; margin-top: 12px; }
+  .kv .k { color: #6b7280; font-family: var(--mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="sub-shell">
+  <div class="sub-brand">
+    <div class="mark">演</div>
+    <div class="nm">演示子系统<small>DEMO SUBSYSTEM · 模拟子系统如何对接 SSO</small></div>
+  </div>
+
+  <div id="stateBox" class="sub-state loading">正在通过 ticket 登录…</div>
+  <div id="userBox" class="card card-pad" style="display:none">
+    <h3>登录成功后的子系统页面 <span class="tag">此处展示真实子系统自己的业务内容</span></h3>
+    <div id="userKv" class="kv"></div>
+  </div>
+</div>
+
+<script>
+(async function () {
+  const $ = (s) => document.querySelector(s);
+  const state = $('#stateBox');
+
+  // 取票据：query（按配置的票据参数名）或路径末段（path 携带方式）
+  let tp = 'ticket';
+  try { tp = (await (await fetch('/api/portal/config')).json()).data.ticketParam || 'ticket'; } catch {}
+  const q = new URLSearchParams(location.search);
+  let ticket = q.get(tp) || q.get('ticket') || q.get('token');
+  if (!ticket) {
+    const seg = location.pathname.split('/').filter(Boolean).pop();
+    if (/^(ST|AT|CODE)-/.test(seg)) ticket = seg;
+  }
+
+  if (!ticket) {
+    state.className = 'sub-state err';
+    state.innerHTML = '<div class="t">未收到 ticket</div>平台跳转本系统时应携带登录票据（查询参数或路径参数，方式在「菜单管理」里配置）';
+    return;
+  }
+
+  try {
+    // 该演示接口在「接口配置」里声明了必需请求头 X-App-Id（未携带/不匹配会被模拟器 403 拒绝）
+    const r = await fetch('/demo/api/user/' + encodeURIComponent(ticket), {
+      headers: { 'X-App-Id': 'sso-simulator' },
+    });
+    if (!r.ok) {
+      let msg = '用户信息接口返回 HTTP ' + r.status;
+      try { const e = await r.json(); if (e && e.message) msg = e.message; } catch {}
+      throw new Error(msg);
+    }
+    const body = await r.json();
+    const u = body.data || body.userInfo || body;
+    state.className = 'sub-state ok';
+    state.innerHTML = '<div class="t">✓ ticket 验证通过，已登录</div>票据：<span class="token-chip">' + ticket.slice(0, 26) + '…</span>（调用了模拟器的用户信息查询接口）';
+    $('#userBox').style.display = 'block';
+    const rows = [
+      ['账号', u.account || u.userName || u.username],
+      ['姓名', u.realName || u.displayName],
+      ['部门', u.deptName || u.department],
+      ['职位', u.jobTitle || u.position],
+      ['邮箱', u.email],
+      ['角色', (u.roles || []).join(', ')],
+    ];
+    $('#userKv').innerHTML = rows
+      .filter(([, v]) => v !== undefined && v !== '')
+      .map(([k, v]) => '<div class="k">' + k + '</div><div>' + String(v) + '</div>').join('');
+  } catch (e) {
+    state.className = 'sub-state err';
+    state.innerHTML = '<div class="t">ticket 校验失败</div>' + e.message;
+  }
+})();
+</script>
+</body>
+</html>

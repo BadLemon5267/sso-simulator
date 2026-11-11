@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>统一身份认证 · 模拟环境</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%233538cd'/><circle cx='12' cy='10' r='4' fill='none' stroke='white' stroke-width='2'/><path d='M8 14l-2 6M12 14v6M16 14l2 6' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>">
+</head>
+<body>
+
+<!-- 登录视图 -->
+<div id="loginView" style="display:none">
+  <div class="portal-bg">
+    <div class="portal-card">
+      <div class="logo-row">
+        <div class="mark"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="4"/><path d="M8 14l-2 6M12 14v6M16 14l2 6"/></svg></div>
+        <h1>统一身份认证</h1>
+      </div>
+      <div class="sub" style="padding-left:0">SSO Simulator · <b>模拟调试环境</b>，非生产系统</div>
+      <div id="svcNote" class="login-error" style="display:none;background:var(--accent-soft);color:var(--accent);border-color:#c7cbff"></div>
+      <div id="loginError" class="login-error" style="display:none"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label>用户名</label>
+          <input type="text" id="username" autocomplete="username" placeholder="admin / zhangsan / lisi" required>
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <input type="password" id="password" autocomplete="current-password" placeholder="123456" required>
+        </div>
+        <button class="btn primary" type="submit" id="btnLogin" style="width:100%;justify-content:center;padding:10px">登 录</button>
+      </form>
+      <div class="quick-users" id="quickBox" style="display:none">
+        <div class="t">模拟用户快捷登录（点击自动填入，密码即默认 123456）</div>
+        <div class="chips" id="quickChips"></div>
+      </div>
+      <div class="portal-foot"><a href="/admin">管理控制台 →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 已登录视图 -->
+<div id="dashView" style="display:none">
+  <div class="portal-shell">
+    <header class="portal-top">
+      <div class="mark"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="4"/><path d="M8 14l-2 6M12 14v6M16 14l2 6"/></svg></div>
+      <div class="ttl">统一身份认证<small>SSO SIMULATOR</small></div>
+      <div class="who">
+        <span id="whoName"></span>
+        <button class="btn sm" id="btnLogout">退出登录</button>
+      </div>
+    </header>
+    <div class="portal-layout">
+      <!-- 侧边菜单：用户信息（首页）+ 动态子系统菜单 -->
+      <aside class="portal-side">
+        <div class="side-group">门户</div>
+        <button class="side-item on" id="sideHome">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.4 3.6-5.2 7-5.2s6.2 1.8 7 5.2"/></svg>
+          <span>用户信息</span>
+        </button>
+        <div class="side-group" id="menuGroup" style="display:none">子系统</div>
+        <div id="menuList"></div>
+      </aside>
+
+      <!-- 内容区：用户信息首页 / 子系统 iframe -->
+      <main class="portal-main">
+        <div id="homeView">
+          <div id="redirectBox"></div>
+          <div class="card welcome-card">
+            <div class="hi" id="hiText"></div>
+            <div class="meta" id="metaText"></div>
+            <div class="role-row" id="roleRow"></div>
+          </div>
+          <div class="card card-pad" style="margin-bottom:16px">
+            <h3>登录身份属性 <span class="tag">组件系统校验票据后将拿到这些字段</span></h3>
+            <div class="attr-grid" id="attrGrid"></div>
+          </div>
+        </div>
+
+        <div id="subView" style="display:none">
+          <div class="card sub-frame-card">
+            <div class="sub-head">
+              <span class="m-chip" id="subName"></span>
+              <span style="flex:1"></span>
+              <button class="btn sm ghost" id="subReload">重新加载</button>
+              <a class="btn sm ghost" id="subNewTab" target="_blank" style="text-decoration:none">新窗口打开</a>
+            </div>
+            <div class="sub-body">
+              <div class="sub-loading" id="subLoading">
+                <div class="spinner"></div>
+                <div class="t" id="subLoadingText">正在进入子系统…</div>
+                <div class="ticket-line" id="subTicketLine"></div>
+              </div>
+              <iframe id="subFrame" style="display:none"></iframe>
+              <div class="sub-error" id="subError" style="display:none">
+                <div class="big">⚠</div>
+                <div class="t">子系统加载失败</div>
+                <div class="d" id="subErrorText">在限定时间内没有收到页面加载完成事件。</div>
+                <div class="acts">
+                  <button class="btn primary sm" id="subRetry">重试</button>
+                  <a class="btn sm" id="subErrNewTab" target="_blank" style="text-decoration:none">新窗口打开</a>
+                </div>
+                <div class="d" style="font-size:11.5px;margin-top:10px;color:var(--ink-3)">提示：若页面显示空白，可能是子系统设置了 X-Frame-Options / CSP 拒绝被内嵌，可用「新窗口打开」验证。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<div id="toastRoot"></div>
+<script src="/portal.js"></script>
+</body>
+</html>

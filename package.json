@@ -1,0 +1,17 @@
+{
+  "name": "sso-simulator",
+  "version": "1.0.0",
+  "description": "SSO 模拟服务 —— 单点登录适配调试环境（CAS / OAuth2 / 可配置用户信息查询接口）",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "js-yaml": "^4.1.0"
+  }
+}

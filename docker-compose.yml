@@ -1,0 +1,13 @@
+services:
+  sso-simulator:
+    build: .
+    image: sso-simulator:latest
+    container_name: sso-simulator
+    ports:
+      - "3000:3000"          # 改左边端口即可换映射，如 "8080:3000"
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}   # 管理控制台密码
+      # PUBLIC_BASE_URL: https://sso.example.local:3000  # 反向代理/自定义域名时填写（用于 OIDC 发现文档）
+    volumes:
+      - ./data:/app/data     # 用户/角色/接口配置持久化（JSON 文件）
+    restart: unless-stopped

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSO Simulator · 管理控制台</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%233538cd'/><circle cx='12' cy='10' r='4' fill='none' stroke='white' stroke-width='2'/><path d='M8 14l-2 6M12 14v6M16 14l2 6' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>">
+</head>
+<body>
+
+<!-- 管理员登录 -->
+<div id="loginView" style="display:none">
+  <div class="portal-bg">
+    <div class="portal-card">
+      <div class="logo-row">
+        <div class="mark"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="4"/><path d="M8 14l-2 6M12 14v6M16 14l2 6"/></svg></div>
+        <h1>管理控制台</h1>
+      </div>
+      <div class="sub" style="padding-left:0;margin-bottom:20px">SSO Simulator · 单点登录调试环境</div>
+      <div id="loginError" class="login-error" style="display:none"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label>管理密码</label>
+          <input type="password" id="loginPassword" placeholder="默认 admin123（环境变量 ADMIN_PASSWORD）" autocomplete="current-password" required>
+          <div class="hint">用于配置用户信息查询接口、用户与角色管理</div>
+        </div>
+        <button class="btn primary" type="submit" style="width:100%;justify-content:center;padding:10px">登 录</button>
+      </form>
+      <div class="portal-foot"><a href="/portal">← 返回门户登录页</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 控制台 -->
+<div id="appView" style="display:none">
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="4"/><path d="M8 14l-2 6M12 14v6M16 14l2 6"/></svg></div>
+        <div class="name">SSO Simulator<small>DEBUG CONSOLE</small></div>
+      </div>
+      <nav class="nav" id="nav">
+        <button class="nav-item" data-tab="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 7H9a2 2 0 110-4h9a2 2 0 012 2v14a2 2 0 01-2 2H9a2 2 0 110-4h11"/><path d="M4 8v8" opacity=".4"/></svg><span>用户接口</span></button>
+        <button class="nav-item" data-tab="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><circle cx="17.5" cy="9" r="2.5" opacity=".5"/><path d="M15.5 15.4c2.4.2 4.3 1.7 5 4.1" opacity=".5"/></svg><span>用户管理</span></button>
+        <button class="nav-item" data-tab="roles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l8 4v5c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg><span>角色管理</span></button>
+        <button class="nav-item" data-tab="menus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M9.5 9.5v10"/></svg><span>菜单管理</span></button>
+        <button class="nav-item" data-tab="integrate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 007.5.5l2-2a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7.5-.5l-2 2a5 5 0 007 7l1-1"/></svg><span>接入信息</span></button>
+        <button class="nav-item" data-tab="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16M4 10h10M4 15h16M4 20h8"/></svg><span>调试日志</span></button>
+        <button class="nav-item" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 00-2-1.2L14 3h-4l-.4 2.6a7 7 0 00-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 000 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 002 1.2L10 21h4l.4-2.6a7 7 0 002-1.2l2.4 1 2-3.4-2-1.6c.1-.4.2-.8.2-1.2z"/></svg><span>设置</span></button>
+      </nav>
+      <div class="foot">
+        <span>v1.0</span>
+        <a id="btnAdminLogout">退出控制台</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <!-- 用户接口配置 -->
+      <section id="tab-config" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div>
+            <h1>用户信息查询接口</h1>
+            <div class="sub">模拟器在本地按平台方的接口契约提供该接口 —— 子系统直接调用本模拟器，用「用户/角色管理」里的数据按「响应参数」渲染出与平台一致格式的返回</div>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn" id="btnAddConfig">＋ 新增配置</button>
+          <button class="btn" id="btnOpenapi">上传 OpenAPI</button>
+        </div>
+        <div class="config-grid">
+          <div class="cfg-list" id="cfgList"></div>
+          <div class="card card-pad" id="cfgEditor"></div>
+        </div>
+      </section>
+
+      <!-- 用户管理 -->
+      <section id="tab-users" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>用户管理</h1><div class="sub">模拟登录使用的账号池；快捷登录会列出其中启用的用户</div></div>
+          <div class="spacer"></div>
+          <input type="text" id="userSearch" placeholder="搜索用户名 / 姓名 / 部门…" style="width:230px">
+          <button class="btn primary" id="btnAddUser">＋ 新增用户</button>
+        </div>
+        <div class="table-wrap"><table class="tbl"><thead>
+          <tr><th>用户名</th><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th style="width:190px">操作</th></tr>
+        </thead><tbody id="userTbody"></tbody></table></div>
+      </section>
+
+      <!-- 角色管理 -->
+      <section id="tab-roles" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>角色管理</h1><div class="sub">角色会以 roles / roleNames / permissions 属性随票据校验结果返回</div></div>
+          <div class="spacer"></div>
+          <button class="btn primary" id="btnAddRole">＋ 新增角色</button>
+        </div>
+        <div class="table-wrap"><table class="tbl"><thead>
+          <tr><th>编码</th><th>名称</th><th>描述</th><th>权限</th><th>用户数</th><th style="width:150px">操作</th></tr>
+        </thead><tbody id="roleTbody"></tbody></table></div>
+      </section>
+
+      <!-- 菜单管理（子系统 iframe 内嵌） -->
+      <section id="tab-menus" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>菜单管理</h1><div class="sub">子系统以 iframe 内嵌到门户：用户点菜单时现签发票据拼到子系统地址，子系统用票据调「用户信息查询接口」完成登录</div></div>
+          <div class="spacer"></div>
+          <button class="btn primary" id="btnAddMenu">＋ 新增菜单</button>
+        </div>
+        <div class="table-wrap"><table class="tbl"><thead>
+          <tr><th style="width:60px">排序</th><th>菜单名称</th><th>子系统地址</th><th>票据携带方式</th><th>状态</th><th style="width:150px">操作</th></tr>
+        </thead><tbody id="menuTbody"></tbody></table></div>
+      </section>
+
+      <!-- 接入信息 -->
+      <section id="tab-integrate" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>接入信息</h1><div class="sub">把下列地址配置到被调试的组件系统（origin 取当前浏览器地址）</div></div>
+        </div>
+        <div id="integrateBody" style="display:grid;gap:16px"></div>
+      </section>
+
+      <!-- 调试日志 -->
+      <section id="tab-logs" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>调试日志</h1><div class="sub">最近 200 条认证相关请求（/sso、/cas、/oauth2、/api/validate、/demo），仅存于内存</div></div>
+          <div class="spacer"></div>
+          <label class="switch"><input type="checkbox" id="logAuto" checked><span class="track"></span><span class="lbl">自动刷新</span></label>
+          <button class="btn" id="btnLogRefresh">刷新</button>
+          <button class="btn danger" id="btnLogClear">清空</button>
+        </div>
+        <div class="table-wrap"><table class="tbl"><thead>
+          <tr><th>时间</th><th>方法</th><th>路径 / 参数</th><th>状态</th><th>耗时</th><th>来源 IP</th></tr>
+        </thead><tbody id="logTbody"></tbody></table></div>
+      </section>
+
+      <!-- 设置 -->
+      <section id="tab-settings" class="tab-panel" style="display:none">
+        <div class="page-head">
+          <div><h1>设置</h1><div class="sub">票据有效期与退出跳转等全局参数</div></div>
+        </div>
+        <div class="card card-pad" style="max-width:620px">
+          <div class="field">
+            <label>登录回跳参数名（逗号分隔，按优先级）</label>
+            <input type="text" id="setRedirectParams" placeholder="service, redirect_url, returnUrl, callback, backUrl">
+            <div class="hint">子系统跳转到登录页时携带回跳地址的参数名。登录成功后按命中的第一个参数跳回并携带票据。例如：<code>…/portal?redirect_url=http://子系统/cb</code></div>
+          </div>
+          <div class="field">
+            <label>跳回时携带票据的参数名</label>
+            <input type="text" id="setTicketParam" placeholder="ticket">
+            <div class="hint">登录成功跳回组件时附加的参数名，如 <code>http://子系统/cb?ticket=ST-xxx</code>（改为 code/token 等可适配不同组件的取参习惯）</div>
+          </div>
+          <div class="field">
+            <label>票据单次有效（一次性消费）</label>
+            <label class="switch"><input type="checkbox" id="setTicketSingleUse" checked><span class="track"></span><span class="lbl">开启</span></label>
+            <div class="hint">开启（标准 CAS）：每次进入子系统现签一张新票，子系统校验一次后即失效。关闭（模拟票据可重复消费的平台）：门户登录态期间下发的始终是<b>同一张有效票据</b>，子系统可反复校验，门户登出或会话过期后才失效。</div>
+          </div>
+          <div class="field">
+            <label>默认登出跳转地址（组件登录页）</label>
+            <input type="text" id="setLogoutUrl" placeholder="例如 http://localhost:8081/login">
+            <div class="hint">门户退出、/sso/logout 未带 service 参数时跳转到此地址 —— 即「退出到组件登录页」。留空则回到本门户。</div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>CAS Ticket 有效期（秒）</label>
+              <input type="number" id="setTicketTtl" min="5">
+            </div>
+            <div class="field">
+              <label>Access Token 有效期（秒）</label>
+              <input type="number" id="setTokenTtl" min="60">
+            </div>
+          </div>
+          <button class="btn primary" id="btnSaveSettings">保存设置</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script src="/admin.js"></script>
+</body>
+</html>
